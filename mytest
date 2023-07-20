@@ -1,0 +1,181 @@
+/*
+Name: Joel Solar
+PSU ID: 951231737
+File name: proj6.cpp
+Course: CMPSC465 - Data Structure and Algorithms
+Semester: 2023
+Due Time: 11:59 pm, Sunday, July 16, 2023.
+Time of Last Modification: 07:00 pm, Sunday, July 16, 2023.
+Link: https://replit.com/@JoelSolar1/proj6#main.cpp
+
+Description:
+Given a 2D binary matrix filled with 0's and 1's, find the largest square containing all 1's and return its area.
+Program Input:
+
+4 5
+1 0 1 0 0
+1 0 1 1 1
+1 1 1 1 1
+1 0 0 1 0
+5 7
+1 0 1 0 0 1 1
+1 0 1 1 1 1 1
+1 1 1 1 1 0 1
+1 0 1 1 1 0 1
+1 0 1 0 1 0 1
+5 5
+1 1 1 1 1
+1 1 1 1 1
+1 1 1 1 1
+1 1 1 1 1
+1 1 1 1 1
+0
+
+Program Output:
+Matrix: 
+1 0 1 0 0 
+1 0 1 1 1 
+1 1 1 1 1 
+1 0 0 1 0 
+Largest Square: 4
+
+Matrix: 
+1 0 1 0 0 1 1 
+1 0 1 1 1 1 1 
+1 1 1 1 1 0 1 
+1 0 1 1 1 0 1 
+1 0 1 0 1 0 1 
+Largest Square: 9
+
+Matrix: 
+1 1 1 1 1 
+1 1 1 1 1 
+1 1 1 1 1 
+1 1 1 1 1 
+1 1 1 1 1 
+Largest Square: 25
+
+Matrix: 
+1 1 0 0 
+1 1 0 0 
+0 0 1 1 
+0 0 1 1 
+Largest Square: 4
+
+Matrix: 
+0 0 0 0 
+0 0 0 0 
+0 0 1 1 
+0 0 1 0 
+Largest Square: 1
+
+Matrix: 
+0 1 1 1 1 
+1 0 1 0 1 
+1 1 0 1 1 
+1 0 1 0 1 
+1 1 1 1 1 
+Largest Square: 1
+
+Matrix: 
+1 1 1 1 1 0 1 
+1 1 1 1 1 0 1 
+1 1 1 1 0 0 1 
+1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 
+Largest Square: 16
+
+Matrix: 
+1 1 0 1 
+1 1 0 1 
+0 0 1 1 
+0 0 1 1 
+Largest Square: 4
+
+Matrix: 
+0 0 0 0 
+0 0 0 0 
+0 0 1 1 
+0 0 1 1 
+Largest Square: 4
+
+TEST CASES:
+All test cases are straightforward. More matrices can be added to the input.txt file and results are printed out on the console.
+*/
+#include <iostream>
+#include <fstream>
+#include <cstring>
+using namespace std;
+
+int main() {
+    ifstream inputFile("input.txt");
+    if (!inputFile) {
+        cerr << "file cannot be open..." << endl;
+        return 1;
+    }
+
+    while (1) {
+        int n, m; // matrix dimensions
+        inputFile >> n;
+        if (n == 0) break;
+        inputFile >> m;
+
+        bool one = 0; // Check 1's in matrix
+        int x[n][m];
+
+        cout << "Matrix: " << endl;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                inputFile >> x[i][j];
+                if (x[i][j] == 1) one = true;
+                cout << x[i][j] << " ";
+            }
+            cout << endl;
+        }
+
+        int sum[n][m]; // sum of all the elements in the matrix
+        memset(sum, 0, sizeof(sum));
+
+        if (!one) {
+            cout << "Largest Square: " << endl;
+            cout << "0" << endl << endl;
+            continue;
+        }
+
+        int ans = 1;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                // sum in a rectangle as diagonal
+                sum[i][j] = x[i][j];
+                if (i > 0) sum[i][j] += sum[i - 1][j];
+                if (j > 0) sum[i][j] += sum[i][j - 1];
+                if (i > 0 && j > 0) sum[i][j] -= sum[i - 1][j - 1];
+            }
+        }
+
+        // get x^2
+        for (int k = 2; k <= min(n, m); k++) {
+            bool found = false;
+            for (int i = 0; i < n - k + 1; i++) {
+                for (int j = 0; j < m - k + 1; j++) {
+                    int temp = sum[i + k - 1][j + k - 1];
+                    if (i > 0) temp -= sum[i - 1][j + k - 1];
+                    if (j > 0) temp -= sum[i + k - 1][j - 1];
+                    if (i > 0 && j > 0) temp += sum[i - 1][j - 1];
+                    if (temp == k * k) {
+                        found = true;
+                        ans = k;
+                    }
+                }
+                if (found) break;
+            }
+            if (!found) break;
+        }
+        cout << "Largest Square: " ;
+        cout << ans * ans << endl << endl;
+    }
+
+    inputFile.close();
+
+    return 0;
+}
